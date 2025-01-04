@@ -1,0 +1,145 @@
+!
+version 15.1
+no service timestamps log datetime msec
+no service timestamps debug datetime msec
+no service password-encryption
+!
+hostname NB.local_R1
+!
+!
+!
+!
+!
+!
+!
+!
+ip cef
+ipv6 unicast-routing
+!
+no ipv6 cef
+!
+!
+!
+!
+license udi pid CISCO1941/K9 sn FTX152468IS-
+license boot module c1900 technology-package securityk9
+!
+!
+!
+crypto isakmp policy 10
+ authentication pre-share
+!
+crypto isakmp key Asdf0123 address 123.232.213.26
+!
+!
+!
+crypto ipsec transform-set Suli esp-aes 256 esp-sha-hmac
+!
+crypto map R2-R1 10 ipsec-isakmp 
+ set peer 123.232.213.26
+ set transform-set Suli 
+ match address 102
+!
+!
+!
+!
+!
+!
+spanning-tree mode pvst
+!
+!
+!
+!
+!
+!
+interface GigabitEthernet0/0
+ no ip address
+ duplex auto
+ speed auto
+!
+interface GigabitEthernet0/0.18
+ encapsulation dot1Q 18
+ ip address 172.17.0.254 255.255.255.128
+ ip helper-address 172.16.1.60
+ ip nat inside
+!
+interface GigabitEthernet0/0.74
+ encapsulation dot1Q 74
+ ip address 172.17.1.62 255.255.255.224
+ ip nat inside
+!
+interface GigabitEthernet0/1
+ no ip address
+ duplex auto
+ speed auto
+!
+interface GigabitEthernet0/1.38
+ encapsulation dot1Q 38
+ ip address 172.17.0.126 255.255.255.128
+ ip helper-address 172.16.1.60
+ ipv6 address FE80::CC50 link-local
+ ipv6 address 2538:ABCD:FF11:29DC:CE15::FFF1/80
+!
+interface GigabitEthernet0/1.67
+ encapsulation dot1Q 67
+ ip address 172.17.1.30 255.255.255.224
+ ip nat inside
+!
+interface Serial0/0/0
+ ip address 10.10.10.2 255.255.255.252
+ ipv6 address 2538:ABCD:FF11:29DC:FF05::2/80
+ clock rate 2000000
+!
+interface Serial0/0/1
+ ip address 123.232.213.1 255.255.255.252
+ ip nat outside
+ ipv6 address 7001:4C56:0:5::1/64
+ crypto map R2-R1
+!
+interface Serial0/1/0
+ no ip address
+ clock rate 2000000
+ shutdown
+!
+interface Serial0/1/1
+ no ip address
+ clock rate 2000000
+ shutdown
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+router rip
+!
+ip nat inside source list 101 interface Serial0/0/1 overload
+ip classless
+ip route 0.0.0.0 0.0.0.0 123.232.213.2 
+ip route 172.16.0.0 255.255.254.0 10.10.10.1 
+ip route 10.128.0.0 255.255.254.0 10.10.10.1 
+ip route 0.0.0.0 0.0.0.0 10.10.10.1 10
+!
+ip flow-export version 9
+!
+ipv6 route ::/0 Serial0/0/1
+!
+access-list 102 permit ip 172.17.0.0 0.0.1.255 172.16.0.0 0.0.1.255
+access-list 101 permit ip any any
+!
+no cdp run
+!
+!
+!
+!
+!
+line con 0
+!
+line aux 0
+!
+line vty 0 4
+ login
+!
+!
+!
+end
+

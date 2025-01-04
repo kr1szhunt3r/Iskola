@@ -1,0 +1,138 @@
+!
+version 15.1
+no service timestamps log datetime msec
+no service timestamps debug datetime msec
+no service password-encryption
+!
+hostname Liska.local_R2
+!
+!
+!
+!
+!
+!
+!
+!
+no ip cef
+ipv6 unicast-routing
+!
+no ipv6 cef
+!
+!
+!
+!
+license udi pid CISCO1941/K9 sn FTX1524BMMN-
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+spanning-tree mode pvst
+!
+!
+!
+!
+!
+!
+interface GigabitEthernet0/0
+ ip address 172.16.1.102 255.255.255.248
+ ip helper-address 172.16.1.60
+ duplex auto
+ speed auto
+ ipv6 address FE80::CC01 link-local
+ ipv6 address 2538:ABCD:FF11:29DC:CC01::FFF1/80
+ ipv6 ospf cost 10
+ ipv6 ospf 10 area 14
+!
+interface GigabitEthernet0/1
+ no ip address
+ duplex auto
+ speed auto
+!
+interface GigabitEthernet0/1.30
+ encapsulation dot1Q 30
+ ip address 172.16.1.30 255.255.255.240
+ ip helper-address 172.16.1.60
+ ipv6 address 2538:ABCD:FF11:29DC:CC03::FFF1/80
+ ipv6 ospf cost 10
+ ipv6 ospf 10 area 14
+!
+interface GigabitEthernet0/1.54
+ encapsulation dot1Q 54
+ ip address 172.16.1.54 255.255.255.240
+ ip helper-address 172.16.1.60
+ ipv6 address 2538:ABCD:FF11:29DC:CC02::FFF1/80
+ ipv6 ospf cost 10
+ ipv6 ospf 10 area 14
+!
+interface GigabitEthernet0/1.106
+ encapsulation dot1Q 106
+ ip address 172.16.1.106 255.255.255.248
+!
+interface Serial0/0/0
+ ip address 172.16.1.77 255.255.255.252
+ ipv6 address 2538:ABCD:FF11:29DC:FF01::1/80
+ ipv6 ospf cost 10
+ ipv6 ospf 10 area 14
+ clock rate 2000000
+!
+interface Serial0/0/1
+ ip address 172.16.1.66 255.255.255.252
+ ipv6 address 2538:ABCD:FF11:29DC:FF03::2/80
+ ipv6 ospf cost 10
+ ipv6 ospf 10 area 14
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+router ospf 1024
+ log-adjacency-changes
+ passive-interface GigabitEthernet0/0
+ passive-interface GigabitEthernet0/1
+ network 172.16.1.16 0.0.0.15 area 14
+ network 172.16.1.48 0.0.0.7 area 14
+ network 172.16.1.92 0.0.0.3 area 14
+ network 172.16.1.76 0.0.0.3 area 14
+ network 172.16.1.64 0.0.0.3 area 14
+ network 172.16.1.100 0.0.0.3 area 14
+ network 172.16.1.96 0.0.0.7 area 14
+!
+ipv6 router ospf 10
+ router-id 2.2.2.2
+ log-adjacency-changes
+!
+ipv6 router ospf 1024
+ log-adjacency-changes
+!
+ip classless
+ip route 0.0.0.0 0.0.0.0 172.16.1.65 
+ip route 0.0.0.0 0.0.0.0 172.16.1.78 2
+!
+ip flow-export version 9
+!
+ipv6 route ::/0 2538:ABCD:FF11:29DC:FF03::1
+ipv6 route ::/0 2538:ABCD:FF11:29DC:FF01::2
+!
+!
+!
+!
+!
+!
+line con 0
+!
+line aux 0
+!
+line vty 0 4
+ login
+!
+!
+!
+end
+

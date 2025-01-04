@@ -1,0 +1,706 @@
+192.168.11.0/24 Domain Name:ugyved_iroda.local
+
+
+Subnet Name	Address		Mask	Dec Mask	Assignable Range		VLAN_ID
+ub		192.168.11.0	/27	255.255.255.224	192.168.11.1-192.168.11.30	30
+ub_wifi		192.168.11.32	/27	255.255.255.224	192.168.11.33-192.168.11.62	62
+vezetosegi_wifi	192.168.11.64	/28	255.255.255.240	192.168.11.65-192.168.11.78	78
+fonok_szoba	192.168.11.80	/29	255.255.255.248	192.168.11.81-192.168.11.86	86
+titkarno_szoba	192.168.11.88	/29	255.255.255.248	192.168.11.89-192.168.11.94	94
+Szerver_szoba	192.168.11.96	/29	255.255.255.248 192.168.11.97-192.168.11.102	102
+SSH1		192.168.11.104	/30	255.255.255.252	192.168.11.105-192.168.11.106	106
+SSH2		192.168.11.108	/30	255.255.255.252	192.168.11.109-192.168.11.110	110
+SSH3		192.168.11.112	/30	255.255.255.252	192.168.11.113-192.168.11.114	114
+R1-R2		192.168.11.116	/30	255.255.255.252	192.168.11.117-192.168.11.118	-
+R1-R3		192.168.11.120	/30	255.255.255.252	192.168.11.121-192.168.11.122	-
+R2-R3		192.168.11.124	/30	255.255.255.252	192.168.11.125-192.168.11.126	-
+Passive interface VLAN_ID SW:5
+Szerver:
+DNS:192.168.11.100 -->Iroda.local
+
+DHCP:
+
+ub_pool
+Default Getaway:	192.168.11.30
+Start IP Address:	192.168.11.2
+Subnet Mask:		255.255.255.224
+Maximum Number of Users:26
+
+ub_wifi_pool
+Default Getaway:	192.168.11.62
+Start IP Address:	192.168.11.33
+Subnet Mask:		255.255.255.224
+Maximum Number of Users:28
+
+vezetosegi_wifi_pool
+Default Getaway:	192.168.11.78
+Start IP Address:	192.168.11.65
+Subnet Mask:		255.255.255.248
+Maximum Number of Users:14
+
+fonok_pool
+Default Getaway:	192.168.11.86
+Start IP Address:	192.168.11.82
+Subnet Mask:		255.255.255.248
+Maximum Number of Users:4
+
+titkarno_pool
+Default Getaway:	192.168.11.94
+Start IP Address:	192.168.11.90
+Subnet Mask:		255.255.255.248
+Maximum Number of Users:4
+
+
+Statikus IP:
+			IP		SM		Default Gateway
+UBnyomtato:		192.168.11.1	255.255.255.224	192.168.11.30
+Titkarnonyomtato:	192.168.11.89	255.255.255.248	192.168.11.94
+Fonoknyomtato:		192.168.11.81	255.255.255.248	192.168.11.86
+Szerver:		192.168.11.100	255.255.255.248	192.168.11.102
+
+
+
+Portok:
+
+R1-R2:			se0/0/0		se0/0/0
+R1-R3:			se0/0/1		se0/0/1
+R2-R3:			se0/0/1		se0/0/0
+R1-ISP			se0/1/1		se0/1/1
+R1-SW1:			g0/1		g0/1
+R2-SW2:			g0/1		g0/1	
+R3-SW3:			g0/1		g0/1
+SW1-Szerver:		g0/2		gig0
+SW1-AdminPC:		fa0/1		fa0
+SW2-FonokPC:		fa0/1		fa0
+SW2-Fonoknyomtato:	fa0/2		fa0
+SW2-TitkarnoPC:		fa0/6		fa0
+SW2-Titkarnoyomtato:	fa0/7		fa0
+SW2-vezetosegi_wifi:	g0/2		internet
+SW3-ub_wifi:		g0/2		internet
+SW3-ubnyomtato		fa0/1		fa0
+SW3_ubPC		fa0/2-24	fa0
+
+
+
+Ugyved_iroda_R1:
+-----------------------------------------------------------------------------------
+ena
+conf t
+hostname ugyved_iroda_R1
+ip domain-name ugyved_iroda.local
+!
+int g0/1
+no sh
+exit
+!
+int g0/1.102
+description R1-Szerverszoba                    |NA:192.168.11.96
+encapsulation dot1Q 102
+ip add 192.168.11.102 255.255.255.248
+no sh
+exit
+!
+int g0/1.106
+description R1-SSH1                   |NA:192.168.11.104
+encapsulation dot1Q 106
+ip add 192.168.11.106 255.255.255.252
+!
+int se0/0/0
+description R1-R2                    |NA:192.168.11.116
+ip add 192.168.11.117 255.255.255.252
+no sh
+exit
+!
+int se0/0/1
+description R1-R3                    |NA:192.168.11.120
+ip add 192.168.11.121 255.255.255.252
+no sh
+exit
+!
+int se0/1/1
+description R1-ISP                    |NA:1.250.120.0
+ip add 1.250.120.1 255.255.255.252
+no sh
+exit
+!
+router ospf 1024
+router-id 1.1.1.1
+passive-interface g0/1
+network 192.168.11.96 0.0.0.7 area 10
+network 192.168.11.116 0.0.0.3 area 0
+network 192.168.11.120 0.0.0.3 area 0
+neighbor 192.168.11.118
+neighbor 192.168.11.122
+!
+ip route 0.0.0.0 0.0.0.0 1.250.120.2
+!
+!
+!
+enable secret 3210fdsA
+line console 0
+password 3210fdsA
+login
+transport ouput ssh
+exit
+!
+line vty 0 15
+password 3210fdsA
+login
+exit
+!
+ser pa
+crypto key generate rsa
+1024
+!
+username alma secret alma
+!
+!
+access-list 106 permit tcp any 192.168.11.106 0.0.0.0 eq 22
+access-list 106 deny tcp any any eq 22
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Ugyved_iroda_R2:
+-----------------------------------------------------------------------------------                    |
+ena
+conf t
+hostname ugyved_iroda_R2
+ip domain-name ugyved_iroda.local
+!
+int g0/1
+no sh
+exit
+!
+int g0/1.78
+description R2-SW2__vezetosegi_wifi                    |NA:192.168.11.64
+encapsulation dot1Q 78
+ip add 192.168.11.78 255.255.255.240
+ip helper-address 192.168.11.100
+!
+int g0/1.86
+description R2-SW2__fonok_szoba                    |NA:192.168.11.80
+encapsulation dot1Q 86
+ip add 192.168.11.86 255.255.255.248
+ip helper-address 192.168.11.100
+!
+int g0/1.94
+description R2-SW2__titkarno_szoba                    |NA:192.168.11.88
+encapsulation dot1Q 94
+ip add 192.168.11.94 255.255.255.248
+ip helper-address 192.168.11.100
+!
+int g0/1.110
+description R2-SW2__SSH2                    |NA:192.168.11.108
+encapsulation dot1Q 110
+ip add 192.168.11.110 255.255.255.252
+ip helper-address 192.168.11.100
+!
+int se0/0/0
+description R2-R1                    |NA:192.168.11.116
+ip add 192.168.11.118 255.255.255.252
+no sh
+exit
+!
+int se0/0/1
+description R2-R3                    |NA:192.168.11.124
+ip add 192.168.11.125 255.255.255.252
+no sh
+exit
+!
+router ospf 1024
+router-id 2.2.2.2
+network 192.168.11.64 0.0.0.15 area 20
+network 192.168.11.80 0.0.0.7 area 20
+network 192.168.11.88 0.0.0.7 area 20
+network 192.168.11.108 0.0.0.3 area 20
+network 192.168.11.116 0.0.0.3 area 0
+network 192.168.11.124 0.0.0.3 area 0
+passive-interface g0/1.78
+passive-interface g0/1.86
+passive-interface g0/1.94
+passive-interface g0/1.110
+neighbor 192.168.11.117
+neighbor 192.168.11.125
+exit
+!
+ip route 0.0.0.0 0.0.0.0 192.168.11.117 1
+ip route 0.0.0.0 0.0.0.0 192.168.11.126 2
+!
+!
+!
+enable secret 3210fdsA
+line console 0
+password 3210fdsA
+login
+transport ouput ssh
+exit
+!
+line vty 0 15
+password 3210fdsA
+login
+exit
+!
+ser pa
+crypto key generate rsa
+1024
+!
+username alma secret alma
+!
+access-list 106 permit tcp any 192.168.11.110 0.0.0.0 eq 22
+access-list 106 deny tcp any any eq 22
+
+
+Ugyved_iroda_R3:
+-----------------------------------------------------------------------------------
+ena
+conf t
+hostname ugyved_iroda_R3
+ip domain-name ugyved_iroda.local
+!
+int g0/1
+no sh
+exit
+!
+int g0/1.30
+description R3-SW3__ub                    |NA:192.168.11.0
+encapsulation dot1Q 30
+ip add 192.168.11.30 255.255.255.224
+ip helper-address 192.168.11.100
+no sh
+!
+int g0/1.62
+description R3-SW3__ub_wifi                    |NA:192.168.11.32
+encapsulation dot1Q 62
+ip add 192.168.11.62 255.255.255.224
+ip helper-address 192.168.11.100
+no sh
+!
+int g0/1.114
+description R3-SW3_SSH3                    |NA:192.168.11.112
+encapsulation dot1Q 114
+ip add 192.168.11.114 255.255.255.252
+ip helper-address 192.168.11.100
+no sh
+!
+int se0/0/0
+description R3-R2                    |NA:192.168.11.124
+ip add 192.168.11.126 255.255.255.252
+no sh
+exit
+!
+int se0/0/1
+description R3-R1                    |NA:192.168.11.120
+ip add 192.168.11.122 255.255.255.252
+no sh
+exit
+!
+router ospf 1024
+router-id 3.3.3.3
+network 192.168.11.0 0.0.0.31 area 30
+network 192.168.11.32 0.0.0.31 area 30
+network 192.168.11.112 0.0.0.3 area 30
+network 192.168.11.124 0.0.0.3 area 0
+network 192.168.11.120 0.0.0.3 area 0
+passive-interface g0/1.30
+passive-interface g0/1.62
+passive-interface g0/1.114
+neighbor 192.168.11.125
+neighbor 192.168.11.121
+exit
+!
+ip route 0.0.0.0 0.0.0.0 192.168.11.121 1
+ip route 0.0.0.0 0.0.0.0 192.168.11.125 2
+!
+!
+!
+enable secret 3210fdsA
+line console 0
+password 3210fdsA
+login
+transport ouput ssh
+exit
+!
+line vty 0 15
+password 3210fdsA
+login
+exit
+!
+crypto key generate rsa
+1024
+!
+ser pa
+username alma secret alma
+!
+access-list 106 permit tcp any 192.168.11.114 0.0.0.0 eq 22
+access-list 106 deny tcp any any eq 22
+
+
+
+
+
+Ugyved_iroda_SW1:
+-----------------------------------------------------------------------------------
+ena
+conf t
+hostname ugyved_iroda_SW1
+ip domain-name ugyved_iroda.local
+!
+vlan 5
+name Passive_interface
+!
+vlan 102
+name Szerver_szoba
+!
+vlan 106
+name SSH1
+!
+ip default-gateway 192.168.11.106
+!
+int g0/1
+description SW1-R1
+switchport mode trunk
+switchport trunk native vlan 106
+switchport trunk allowed vlan 102,106
+!
+int fa0/1
+description Administrator's pc
+switchport mode acces
+switchport acces vlan 102
+!
+int g0/2
+description Server
+switchport mode acces
+switchport acces vlan 102
+!
+int r fa0/2-24
+description Passive_interface
+switchport mode acces
+switchport acces vlan 5
+!
+int vlan 106
+description SW1/SSH1-R1                    |NA:192.168.11.104
+ip add 192.168.11.105 255.255.255.252 
+!
+!
+!
+enable secret 3210fdsA
+line console 0
+password 3210fdsA
+login
+transport ouput ssh
+exit
+!
+line vty 0 15
+password 3210fdsA
+login
+exit
+!
+crypto key generate rsa
+1024
+!
+ser pa
+username alma secret alma
+!
+
+
+
+Ugyved_iroda_SW2:
+-----------------------------------------------------------------------------------
+ena
+conf t
+hostname ugyved_iroda_SW2
+ip domain-name ugyved_iroda.local
+!
+vlan 5
+name Passive_interface
+!
+vlan 86
+name fonok_szoba
+!
+vlan 94
+name titkarno_szoba
+!
+vlan 78
+name vezetosegi_wifi
+!
+vlan 110
+name SSH2
+!
+ip default-getaway 192.168.11.110
+!
+int r fa0/1-5
+description fonok_szoba
+switchport mode access
+switchport access vlan 86
+!
+int r fa0/6-11
+description titkarno_szoba
+switchport mode access
+switchport access vlan 94
+!
+int r fa0/12-24
+description Passive_interface
+switchport mode access
+switchport access vlan 5
+!
+int g0/1
+description SW2-R2
+switchport mode trunk
+!
+int g0/2
+description vezetosegi_wifi
+switchport mode access
+switchport access vlan 78
+!
+int vlan 110
+description SW2/SSH2-R2                    |NA:192.168.11.108
+ip add 192.168.11.109 255.255.255.252
+!
+!
+!
+enable secret 3210fdsA
+line console 0
+password 3210fdsA
+login
+transport ouput ssh
+exit
+!
+line vty 0 15
+password 3210fdsA
+login
+exit
+!
+crypto key generate rsa
+1024
+!
+ser pa
+username alma secret alma
+!
+
+
+
+
+
+
+
+
+
+
+
+
+Ugyved_iroda_SW3:
+-----------------------------------------------------------------------------------
+ena
+conf t
+hostname ugyved_iroda_SW3
+ip domain-name ugyved_iroda.local
+!
+vlan 5
+name Passive_interface
+!
+vlan 30
+name ub
+!
+vlan 62
+name ub_wifi
+!
+vlan 114
+name SSH3
+!
+ip default-getaway 192.168.11.114
+!
+int r fa0/1-24
+description ub
+switchport mode access
+switchport access vlan 30
+!
+int g0/1
+description SW3-R3
+switchport mode trunk
+switchport trunk native vlan 114
+switchport trunk allowed vlan 30,62,114
+!
+int g0/2
+description SW3-ub_wifi
+switchport mode access
+switchport access vlan 62
+!
+int vlan 114
+description SW3/SSH3-R3                    |NA:192.168.11.112
+ip add 192.168.11.113 255.255.255.252
+!
+!
+!
+enable secret 3210fdsA
+line console 0
+password 3210fdsA
+login
+transport ouput ssh
+exit
+!
+line vty 0 15
+password 3210fdsA
+login
+exit
+!
+crypto key generate rsa
+1024
+!
+ser pa
+username alma secret alma
+!
+
+
+
+
+
+
+
+
+
+
+vezetosegi_wifi
+-----------------------------------------------------------------------------------
+Setup:
+Wireless AP
+
+Wireless:
+
+Basic Wireless Settings:
+2.4GHz
+	Network Mode: 		Auto
+	Network Name (SSID):	Vezetoseg
+	SSID Broadcast:		Disabled
+	Standard Channel:	1-2.412GHz
+	Channel Bandwidth:	Auto
+
+5GH - 2
+	Network Mode: 		Auto
+	Network Name (SSID):	Vezetoseg
+	SSID Broadcast:		Disabled
+	Standard Channel:	Auto
+	Channel Bandwidth:	Auto
+
+5GHz - 1
+	Network Mode:		Disabled
+
+Wireless Security:
+2.4GHz
+	Security Mode:		WPA2 Personal
+	Encryption:		AES
+	Passphrase:		Asdf0123
+
+5GHz - 2
+	Security Mode:		WPA2 Personal
+	Encryption:		AES
+	Passphrase:		Asdf0123
+
+5GHz - 1
+	Network Mode:		Disabled
+
+
+UB_wifi
+-----------------------------------------------------------------------------------
+Setup:
+Wireless AP
+
+Wireless:
+
+Basic Wireless Settings:
+2.4GHz
+	Network Mode: 		Auto
+	Network Name (SSID):	Ugynokseg
+	SSID Broadcast:		Disabled
+	Standard Channel:	1-2.412GHz
+	Channel Bandwidth:	Auto
+
+5GH - 2
+	Network Mode: 		Auto
+	Network Name (SSID):	Ugynokseg
+	SSID Broadcast:		Disabled
+	Standard Channel:	Auto
+	Channel Bandwidth:	Auto
+
+5GHz - 1
+	Network Mode:		Disabled
+
+Wireless Security:
+2.4GHz
+	Security Mode:		WPA2 Personal
+	Encryption:		AES
+	Passphrase:		Qwer4567
+
+5GHz - 2
+	Security Mode:		WPA2 Personal
+	Encryption:		AES
+	Passphrase:		Qwer4567
+
+5GHz - 1
+	Network Mode:		Disabled
+
+
+
+
+
+
+ISP
+-----------------------------------------------------------------------------------
+ena
+conf t
+hostname ISP
+!
+int se0/1/1
+description ISP-R1                    |NA:1.250.120.0
+ip add 1.250.120.2 255.255.255.252
+no sh
+exit
+!
+int g0/1
+ip add 2.2.2.2 255.255.255.252	
+!
+ip route 192.168.11.0 255.255.255.128 1.255.120.1
+!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

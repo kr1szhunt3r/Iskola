@@ -1,0 +1,120 @@
+!
+version 15.1
+no service timestamps log datetime msec
+no service timestamps debug datetime msec
+no service password-encryption
+!
+hostname Liska.local_R3
+!
+!
+!
+!
+!
+!
+!
+!
+ip cef
+ipv6 unicast-routing
+!
+no ipv6 cef
+!
+!
+!
+!
+license udi pid CISCO1941/K9 sn FTX1524FI3F-
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+spanning-tree mode pvst
+!
+!
+!
+!
+!
+!
+interface GigabitEthernet0/0
+ ip address 172.16.0.254 255.255.255.128
+ ip helper-address 172.16.1.60
+ duplex auto
+ speed auto
+ ipv6 address FE80::CC04 link-local
+ ipv6 address 2538:ABCD:FF11:29DC:CC04::FFF1/80
+ ipv6 ospf 10 area 14
+!
+interface GigabitEthernet0/1
+ no ip address
+ duplex auto
+ speed auto
+!
+interface GigabitEthernet0/1.126
+ encapsulation dot1Q 126
+ ip address 172.16.0.126 255.255.255.128
+ ip helper-address 172.16.1.60
+ ipv6 address FE80::CC00 link-local
+ ipv6 address 2538:ABCD:FF11:29DC:CC00::FFF1/80
+ ipv6 ospf 10 area 14
+!
+interface Serial0/0/0
+ ip address 172.16.1.78 255.255.255.252
+ ipv6 address 2538:ABCD:FF11:29DC:FF01::2/80
+ ipv6 ospf 10 area 14
+!
+interface Serial0/0/1
+ ip address 172.16.1.81 255.255.255.252
+ ipv6 address 2538:ABCD:FF11:29DC:FF00::1/80
+ ipv6 ospf 10 area 14
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+router ospf 1024
+ router-id 3.3.3.3
+ log-adjacency-changes
+ passive-interface GigabitEthernet0/0
+ passive-interface GigabitEthernet0/1
+ network 172.16.1.76 0.0.0.3 area 14
+ network 172.16.1.80 0.0.0.3 area 14
+ network 172.16.0.128 0.0.0.127 area 14
+ network 172.16.0.0 0.0.0.127 area 14
+!
+ipv6 router ospf 10
+ router-id 3.3.3.3
+ log-adjacency-changes
+!
+ipv6 router ospf 1024
+ log-adjacency-changes
+!
+ip classless
+ip route 0.0.0.0 0.0.0.0 172.16.1.82 
+ip route 0.0.0.0 0.0.0.0 172.16.1.77 2
+!
+ip flow-export version 9
+!
+ipv6 route ::/0 2538:ABCD:FF11:29DC:FF00::2
+ipv6 route ::/0 2538:ABCD:FF11:29DC:FF01::1 2
+!
+!
+!
+!
+!
+!
+line con 0
+!
+line aux 0
+!
+line vty 0 4
+ login
+!
+!
+!
+end
+
